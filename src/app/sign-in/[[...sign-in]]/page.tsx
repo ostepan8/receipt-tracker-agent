@@ -276,8 +276,8 @@ export default function SignInPage() {
           </p>
 
           <p className="mt-3 text-center text-sm text-[var(--brand-gray)]">
-            <Link href="/dashboard" className="text-[var(--brand-teal)] font-medium hover:underline">
-              Go to Dashboard
+            <Link href="/" className="text-[var(--brand-teal)] font-medium hover:underline">
+              Back to Home
             </Link>
           </p>
           </div>

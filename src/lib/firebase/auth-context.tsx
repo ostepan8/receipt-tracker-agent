@@ -67,11 +67,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: User | null) => {
       setUser(firebaseUser);
-      setLoading(false);
 
       if (firebaseUser) {
+        // Set up session before marking loading as complete
         await setupSession(firebaseUser);
       }
+
+      // Only set loading to false AFTER session is set up
+      setLoading(false);
     });
 
     // Set up token refresh every 10 minutes
