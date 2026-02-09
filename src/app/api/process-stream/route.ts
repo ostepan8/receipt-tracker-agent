@@ -8,6 +8,19 @@ import type { ExtractedReceiptData, ReviewableField } from "@/lib/types";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const PROCESSING_TIMEOUT = 4 * 60 * 1000; // 4 minutes
+
+// Helper to create a timeout promise
+function createTimeout(ms: number): Promise<never> {
+  return new Promise((_, reject) => {
+    setTimeout(() => reject(new Error("Processing timed out. Please try again.")), ms);
+  });
+}
+
+// Helper to wrap async operation with timeout
+async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([promise, createTimeout(ms)]);
+}
 
 // Check if mock mode is enabled
 function isMockMode(): boolean {
@@ -40,6 +53,15 @@ export async function POST(req: NextRequest) {
 
   const stream = new ReadableStream({
     async start(controller) {
+      const startTime = Date.now();
+
+      // Check if we've exceeded the timeout
+      const checkTimeout = () => {
+        if (Date.now() - startTime > PROCESSING_TIMEOUT) {
+          throw new Error("Processing timed out. Please try again.");
+        }
+      };
+
       try {
         // 1. Auth check
         sendEvent(controller, encoder, {
@@ -165,7 +187,11 @@ export async function POST(req: NextRequest) {
             receiptId: receipt.id,
           });
 
-          extraction = await extractReceiptData(signedUrl);
+          checkTimeout();
+          extraction = await withTimeout(
+            extractReceiptData(signedUrl),
+            PROCESSING_TIMEOUT - (Date.now() - startTime)
+          );
         }
 
         // 6. Show extracted data
@@ -196,9 +222,13 @@ export async function POST(req: NextRequest) {
           extractedData: extraction,
         });
 
-        const analysis = await analyzeReceipt(
-          extraction as unknown as Record<string, unknown>,
-          recentReceipts
+        checkTimeout();
+        const analysis = await withTimeout(
+          analyzeReceipt(
+            extraction as unknown as Record<string, unknown>,
+            recentReceipts
+          ),
+          PROCESSING_TIMEOUT - (Date.now() - startTime)
         );
 
         sendEvent(controller, encoder, {
@@ -266,11 +296,14 @@ export async function POST(req: NextRequest) {
 
         controller.close();
       } catch (error) {
+        const isTimeout = error instanceof Error && error.message.includes("timed out");
         sendEvent(controller, encoder, {
           step: "error",
-          message: error instanceof Error ? error.message : "Processing failed",
+          message: isTimeout
+            ? "Processing took too long. Please try again with a clearer image."
+            : "Server error. Please try again.",
           progress: 0,
-          error: error instanceof Error ? error.message : "Unknown error",
+          error: isTimeout ? "timeout" : "server_error",
         });
         controller.close();
       }

@@ -151,11 +151,20 @@ export default function DashboardPage() {
     setProcessedReceipt(null);
     setProcessingState({ step: "uploading", message: "Preparing upload...", progress: 5 });
 
+    // Set up 4-minute timeout
+    const TIMEOUT_MS = 4 * 60 * 1000;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
     try {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch("/api/process-stream", { method: "POST", body: formData });
+      const response = await fetch("/api/process-stream", {
+        method: "POST",
+        body: formData,
+        signal: controller.signal,
+      });
       if (!response.ok) throw new Error("Failed to start processing");
 
       const reader = response.body?.getReader();
@@ -190,8 +199,9 @@ export default function DashboardPage() {
 
               if (data.receiptId) receiptId = data.receiptId;
               if (data.error) {
-                setUploadError(data.error);
+                setUploadError(data.message || "An error occurred");
                 setUploadStep("upload");
+                clearTimeout(timeoutId);
                 return;
               }
               if (data.complete) finalData = data;
@@ -201,6 +211,8 @@ export default function DashboardPage() {
           }
         }
       }
+
+      clearTimeout(timeoutId);
 
       if (receiptId && finalData) {
         const receiptResponse = await fetch(`/api/receipts/${receiptId}`);
@@ -217,12 +229,20 @@ export default function DashboardPage() {
         }
       }
     } catch (err) {
+      clearTimeout(timeoutId);
+      const isAborted = err instanceof Error && err.name === "AbortError";
+      const message = isAborted
+        ? "Processing took too long. Please try again with a clearer image."
+        : err instanceof Error
+          ? err.message
+          : "An error occurred";
+
       setProcessingState({
         step: "error",
-        message: err instanceof Error ? err.message : "An error occurred",
+        message,
         progress: 0,
       });
-      setUploadError(err instanceof Error ? err.message : "An error occurred");
+      setUploadError(message);
       setUploadStep("upload");
     }
   };
