@@ -30,7 +30,15 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files - NEVER commit these
+.env
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production
+.env.production.local
 .env*
 
 # vercel
@@ -39,3 +47,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# dev scripts (not for production)
+/scripts
+
+# remotion
+/remotion-demo
+
+# social media posts
+/social-posts
+
+# test data
+/test-receipts
