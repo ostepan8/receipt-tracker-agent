@@ -19,7 +19,8 @@ export const metadata: Metadata = {
   description:
     "Upload receipts, extract data automatically, and generate expense reports with AI.",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/Subconscious_Logo_Graphic.png",
+    apple: "/Subconscious_Logo_Graphic.png",
   },
 };
 
