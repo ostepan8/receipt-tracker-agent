@@ -4,6 +4,7 @@ import {
   getExpenseReports,
   createExpenseReport,
   getReceiptsInDateRange,
+  ensureUserExists,
 } from "@/lib/supabase/queries";
 import { z } from "zod";
 
@@ -27,14 +28,20 @@ const createReportSchema = z.object({
 
 export async function GET(_req: NextRequest) {
   try {
-    const { userId } = await getServerAuth();
+    const { userId, email, name } = await getServerAuth();
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Ensure user exists in database (handles first-time login)
+    if (email) {
+      await ensureUserExists(userId, email, name || null);
+    }
+
     const reports = await getExpenseReports(userId);
     return NextResponse.json({ reports });
-  } catch {
+  } catch (error) {
+    console.error("Failed to fetch reports:", error);
     return NextResponse.json(
       { error: "Failed to fetch reports" },
       { status: 500 }
