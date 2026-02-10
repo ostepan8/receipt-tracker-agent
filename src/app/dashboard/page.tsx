@@ -102,16 +102,16 @@ export default function DashboardPage() {
         // Retry on 401 (middleware auth) or 500 (server error)
         if (retryCount === 0 && (response.status === 401 || response.status === 500)) {
           await new Promise(resolve => setTimeout(resolve, 500));
-          return fetchData(1);
+          return await fetchData(1);
         }
         throw new Error("Failed to fetch receipts");
       }
       const result = await response.json();
       setData(result);
       setError(null);
+      setLoading(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
-    } finally {
       setLoading(false);
     }
   }, [statsPeriod]);
