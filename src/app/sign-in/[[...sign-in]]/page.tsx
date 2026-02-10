@@ -33,6 +33,9 @@ export default function SignInPage() {
 
     try {
       await signIn(email, password);
+      // Small delay to ensure cookie is fully processed before redirect
+      await new Promise(resolve => setTimeout(resolve, 100));
+      router.refresh();
       router.push("/dashboard");
     } catch (err) {
       if (err instanceof Error) {
@@ -53,6 +56,9 @@ export default function SignInPage() {
     setError(null);
     try {
       await signInWithGoogle();
+      // Small delay to ensure cookie is fully processed before redirect
+      await new Promise(resolve => setTimeout(resolve, 100));
+      router.refresh();
       router.push("/dashboard");
     } catch (err) {
       if (err instanceof Error && !err.message.includes("popup-closed")) {
