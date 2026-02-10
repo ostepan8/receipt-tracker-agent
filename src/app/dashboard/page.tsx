@@ -101,7 +101,7 @@ export default function DashboardPage() {
         // On first failure, wait and retry once (handles auth cookie race condition)
         // Retry on 401 (middleware auth) or 500 (server error)
         if (retryCount === 0 && (response.status === 401 || response.status === 500)) {
-          await new Promise(resolve => setTimeout(resolve, 1500));
+          await new Promise(resolve => setTimeout(resolve, 500));
           return fetchData(1);
         }
         throw new Error("Failed to fetch receipts");
