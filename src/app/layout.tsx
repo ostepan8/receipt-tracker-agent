@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import { AuthProvider } from "@/lib/firebase/auth-context";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
@@ -38,6 +39,7 @@ export default function RootLayout({
           {children}
           <Toaster />
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   );
