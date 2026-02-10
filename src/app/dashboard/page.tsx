@@ -94,12 +94,20 @@ export default function DashboardPage() {
   const [editedReceiptData, setEditedReceiptData] = useState<Partial<ReceiptType> | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (retryCount = 0) => {
     try {
       const response = await fetch(`/api/receipts?includeStats=true&limit=10&statsPeriod=${statsPeriod}`);
-      if (!response.ok) throw new Error("Failed to fetch receipts");
+      if (!response.ok) {
+        // On first failure, wait and retry once (handles auth cookie race condition)
+        if (retryCount === 0 && response.status === 500) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          return fetchData(1);
+        }
+        throw new Error("Failed to fetch receipts");
+      }
       const result = await response.json();
       setData(result);
+      setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
