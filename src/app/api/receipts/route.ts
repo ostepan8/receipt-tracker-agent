@@ -1,6 +1,6 @@
 import { getServerAuth } from "@/lib/firebase/server-auth";
 import { NextRequest, NextResponse } from "next/server";
-import { getReceipts, getReceiptStats, type StatsPeriod } from "@/lib/supabase/queries";
+import { getReceipts, getReceiptStats, ensureUserExists, type StatsPeriod } from "@/lib/supabase/queries";
 import { z } from "zod";
 
 const VALID_STATUSES = ["pending", "processing", "completed", "failed", "needs_review"] as const;
@@ -21,9 +21,14 @@ const getReceiptsSchema = z.object({
 
 export async function GET(req: NextRequest) {
   try {
-    const { userId } = await getServerAuth();
+    const { userId, email, name } = await getServerAuth();
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Ensure user exists in database (handles first-time login)
+    if (email) {
+      await ensureUserExists(userId, email, name || null);
     }
 
     const { searchParams } = new URL(req.url);
