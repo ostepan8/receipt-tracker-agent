@@ -109,7 +109,7 @@ export default function LandingPage() {
             className="h-14 px-8 text-base border-[var(--brand-black)]/20 hover:bg-[var(--brand-black)]/5"
             asChild
           >
-            <Link href="https://github.com/subconscious-systems/receipt-agent" target="_blank">
+            <Link href="https://github.com/ostepan8/receipt-tracker-agent" target="_blank">
               <Github className="mr-2 h-4 w-4" />
               View Source
             </Link>
@@ -373,7 +373,7 @@ export default function LandingPage() {
             </p>
             <div className="flex items-center gap-6 text-sm text-[var(--brand-gray)]">
               <a
-                href="https://github.com/subconscious-systems/receipt-agent"
+                href="https://github.com/ostepan8/receipt-tracker-agent"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-[var(--brand-black)] flex items-center gap-1.5"

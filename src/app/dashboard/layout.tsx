@@ -58,7 +58,7 @@ export default function DashboardLayout({
               Docs
             </a>
             <a
-              href="https://github.com/subconscious-systems/receipt-agent"
+              href="https://github.com/ostepan8/receipt-tracker-agent"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-white transition-colors"
