@@ -217,19 +217,21 @@ export async function getReceiptStats(
   totalSpent: number;
   receiptCount: number;
   categoryBreakdown: Record<string, number>;
+  itemCategoryBreakdown: Record<string, number>;
   userCategories: string[];
   allTime: {
     totalSpent: number;
     receiptCount: number;
     categoryBreakdown: Record<string, number>;
+    itemCategoryBreakdown: Record<string, number>;
   };
 }> {
   const supabase = createServerClient();
 
-  // First get ALL completed receipts for all-time stats
+  // First get ALL completed receipts for all-time stats (include line_items for item category breakdown)
   const { data: allReceipts, error: allError } = await supabase
     .from("receipts")
-    .select("total, category")
+    .select("total, category, line_items, transaction_date")
     .eq("user_id", userId)
     .eq("status", "completed");
 
@@ -238,10 +240,18 @@ export async function getReceiptStats(
   const allData = allReceipts || [];
   const allTimeTotalSpent = allData.reduce((sum, r) => sum + (r.total || 0), 0);
   const allTimeCategoryBreakdown: Record<string, number> = {};
+  const allTimeItemCategoryBreakdown: Record<string, number> = {};
 
   for (const receipt of allData) {
-    const category = receipt.category || "other";
+    const category = receipt.category || "Other";
     allTimeCategoryBreakdown[category] = (allTimeCategoryBreakdown[category] || 0) + (receipt.total || 0);
+
+    // Calculate item category breakdown
+    const lineItems = (receipt.line_items as LineItem[]) || [];
+    for (const item of lineItems) {
+      const itemCategory = item.category || "Other";
+      allTimeItemCategoryBreakdown[itemCategory] = (allTimeItemCategoryBreakdown[itemCategory] || 0) + (item.total || 0);
+    }
   }
 
   // Now get period-filtered stats
@@ -264,23 +274,25 @@ export async function getReceiptStats(
         break;
     }
 
-    const { data, error } = await supabase
-      .from("receipts")
-      .select("total, category")
-      .eq("user_id", userId)
-      .eq("status", "completed")
-      .gte("transaction_date", fromDate.toISOString().split("T")[0]);
-
-    if (error) throw new Error(`Failed to get stats: ${error.message}`);
-    periodReceipts = data || [];
+    // Filter from already fetched data
+    const fromDateStr = fromDate.toISOString().split("T")[0];
+    periodReceipts = allData.filter(r => r.transaction_date && r.transaction_date >= fromDateStr);
   }
 
   const totalSpent = periodReceipts.reduce((sum, r) => sum + (r.total || 0), 0);
   const categoryBreakdown: Record<string, number> = {};
+  const itemCategoryBreakdown: Record<string, number> = {};
 
   for (const receipt of periodReceipts) {
-    const category = receipt.category || "other";
+    const category = receipt.category || "Other";
     categoryBreakdown[category] = (categoryBreakdown[category] || 0) + (receipt.total || 0);
+
+    // Calculate item category breakdown for period
+    const lineItems = (receipt.line_items as LineItem[]) || [];
+    for (const item of lineItems) {
+      const itemCategory = item.category || "Other";
+      itemCategoryBreakdown[itemCategory] = (itemCategoryBreakdown[itemCategory] || 0) + (item.total || 0);
+    }
   }
 
   // Also fetch all-time categories for the dropdown
@@ -290,11 +302,13 @@ export async function getReceiptStats(
     totalSpent,
     receiptCount: periodReceipts.length,
     categoryBreakdown,
+    itemCategoryBreakdown,
     userCategories,
     allTime: {
       totalSpent: allTimeTotalSpent,
       receiptCount: allData.length,
       categoryBreakdown: allTimeCategoryBreakdown,
+      itemCategoryBreakdown: allTimeItemCategoryBreakdown,
     },
   };
 }

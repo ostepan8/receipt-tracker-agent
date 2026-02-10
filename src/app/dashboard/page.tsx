@@ -51,11 +51,13 @@ interface DashboardData {
     totalSpent: number;
     receiptCount: number;
     categoryBreakdown: Record<string, number>;
+    itemCategoryBreakdown: Record<string, number>;
     userCategories: string[];
     allTime: {
       totalSpent: number;
       receiptCount: number;
       categoryBreakdown: Record<string, number>;
+      itemCategoryBreakdown: Record<string, number>;
     };
   } | null;
 }
@@ -399,11 +401,11 @@ export default function DashboardPage() {
 
             {/* Main Grid */}
             <div className="grid gap-6 lg:grid-cols-5">
-              {/* Chart - respects period filter */}
+              {/* Chart - respects period filter, shows item categories */}
               <div className="lg:col-span-2 bg-white border border-[var(--brand-black)]/5 rounded-2xl p-6 hover:shadow-lg transition-shadow">
-                <h3 className="text-sm font-semibold text-[var(--brand-black)] mb-4">By Category</h3>
-                {stats?.categoryBreakdown && Object.keys(stats.categoryBreakdown).length > 0 ? (
-                  <ExpenseChart data={stats.categoryBreakdown as Record<ExpenseCategory, number>} />
+                <h3 className="text-sm font-semibold text-[var(--brand-black)] mb-4">Spending by Item</h3>
+                {stats?.itemCategoryBreakdown && Object.keys(stats.itemCategoryBreakdown).length > 0 ? (
+                  <ExpenseChart data={stats.itemCategoryBreakdown} useItemColors />
                 ) : (
                   <div className="flex flex-col items-center justify-center py-8 text-[var(--brand-gray)]">
                     <Receipt className="h-8 w-8 mb-2 opacity-50" />

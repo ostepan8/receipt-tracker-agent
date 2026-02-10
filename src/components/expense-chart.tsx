@@ -8,25 +8,28 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import { CATEGORY_COLORS, getCategoryLabel, type ExpenseCategory } from "@/lib/types";
+import { CATEGORY_COLORS, ITEM_CATEGORY_COLORS, getCategoryLabel, getItemCategoryColor } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
 
 interface ExpenseChartProps {
-  data: Record<ExpenseCategory, number>;
+  data: Record<string, number>;
   showLegend?: boolean;
   compact?: boolean;
+  useItemColors?: boolean;
 }
 
-export function ExpenseChart({ data, showLegend = true, compact = false }: ExpenseChartProps) {
+export function ExpenseChart({ data, showLegend = true, compact = false, useItemColors = false }: ExpenseChartProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const chartData = Object.entries(data)
     .filter(([, value]) => value > 0)
     .map(([category, value]) => ({
-      name: getCategoryLabel(category),
+      name: useItemColors ? category : getCategoryLabel(category),
       value,
       category,
-      color: CATEGORY_COLORS[category as ExpenseCategory] || "#6b7280",
+      color: useItemColors
+        ? (ITEM_CATEGORY_COLORS[category] || getItemCategoryColor(category))
+        : (CATEGORY_COLORS[category] || "#6b7280"),
     }))
     .sort((a, b) => b.value - a.value);
 
