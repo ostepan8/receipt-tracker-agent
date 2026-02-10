@@ -38,9 +38,16 @@ export function ReceiptCard({ receipt, compact = false, showReviewBadge = false 
               <p className="font-medium text-sm text-[var(--brand-black)] truncate max-w-[200px] group-hover:text-[var(--brand-orange)] transition-colors">
                 {receipt.merchant_name || "Unknown Merchant"}
               </p>
-              <p className="text-xs text-[var(--brand-gray)]">
-                {formatRelativeDate(receipt.transaction_date)}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="text-xs text-[var(--brand-gray)]">
+                  {formatRelativeDate(receipt.transaction_date)}
+                </p>
+                {receipt.category && (
+                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-[var(--brand-black)]/10 text-[var(--brand-gray)]">
+                    {EXPENSE_CATEGORIES[receipt.category as ExpenseCategory] || receipt.category}
+                  </Badge>
+                )}
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-3">
