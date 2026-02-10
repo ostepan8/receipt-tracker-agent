@@ -157,6 +157,18 @@ export function ReceiptReview({
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
+                {/* Include current category if it's not in the predefined list */}
+                {editedReceipt.category && !EXPENSE_CATEGORIES[editedReceipt.category] && (
+                  <SelectItem key={editedReceipt.category} value={editedReceipt.category}>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-2.5 h-2.5 rounded-full"
+                        style={{ backgroundColor: CATEGORY_COLORS[editedReceipt.category as ExpenseCategory] }}
+                      />
+                      {editedReceipt.category}
+                    </div>
+                  </SelectItem>
+                )}
                 {Object.entries(EXPENSE_CATEGORIES).map(([key, label]) => (
                   <SelectItem key={key} value={key}>
                     <div className="flex items-center gap-2">

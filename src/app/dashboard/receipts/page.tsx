@@ -141,6 +141,15 @@ export default function ReceiptsPage() {
     return { total, avgAmount, count: filteredReceipts.length };
   }, [filteredReceipts]);
 
+  // Get unique categories from receipts (including custom ones not in EXPENSE_CATEGORIES)
+  const uniqueCategories = useMemo(() => {
+    const categories = new Set<string>();
+    receipts.forEach((r) => {
+      if (r.category) categories.add(r.category);
+    });
+    return Array.from(categories).filter((cat) => !EXPENSE_CATEGORIES[cat]);
+  }, [receipts]);
+
   if (loading) {
     return <ReceiptsPageSkeleton />;
   }
@@ -243,6 +252,11 @@ export default function ReceiptsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
+                {uniqueCategories.map((cat) => (
+                  <SelectItem key={cat} value={cat}>
+                    {cat}
+                  </SelectItem>
+                ))}
                 {Object.entries(EXPENSE_CATEGORIES).map(([key, label]) => (
                   <SelectItem key={key} value={key}>
                     {label}

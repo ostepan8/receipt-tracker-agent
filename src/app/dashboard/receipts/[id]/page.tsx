@@ -432,6 +432,11 @@ export default function ReceiptDetailPage({
                           <SelectValue placeholder="Select" />
                         </SelectTrigger>
                         <SelectContent>
+                          {editedReceipt.category && !EXPENSE_CATEGORIES[editedReceipt.category] && (
+                            <SelectItem key={editedReceipt.category} value={editedReceipt.category}>
+                              {editedReceipt.category}
+                            </SelectItem>
+                          )}
                           {Object.entries(EXPENSE_CATEGORIES).map(([key, label]) => (
                             <SelectItem key={key} value={key}>{label}</SelectItem>
                           ))}
@@ -445,7 +450,7 @@ export default function ReceiptDetailPage({
                           color: categoryColor
                         }}
                       >
-                        {EXPENSE_CATEGORIES[receipt.category as ExpenseCategory] || "Other"}
+                        {EXPENSE_CATEGORIES[receipt.category as ExpenseCategory] || receipt.category || "Other"}
                       </span>
                     )
                   }
