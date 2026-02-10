@@ -151,8 +151,8 @@ export default function DashboardPage() {
     setProcessedReceipt(null);
     setProcessingState({ step: "uploading", message: "Preparing upload...", progress: 5 });
 
-    // Set up 4-minute timeout
-    const TIMEOUT_MS = 4 * 60 * 1000;
+    // Set up 8-minute timeout
+    const TIMEOUT_MS = 8 * 60 * 1000;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 

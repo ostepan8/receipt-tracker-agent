@@ -8,7 +8,7 @@ import type { ExtractedReceiptData, ReviewableField } from "@/lib/types";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const PROCESSING_TIMEOUT = 4 * 60 * 1000; // 4 minutes
+const PROCESSING_TIMEOUT = 8 * 60 * 1000; // 8 minutes
 
 // Helper to create a timeout promise
 function createTimeout(ms: number): Promise<never> {
